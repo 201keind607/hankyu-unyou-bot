@@ -2,6 +2,8 @@ import requests
 from datetime import datetime, date
 import os
 
+print("最新版確認")
+
 
 # ==========================
 # 設定
