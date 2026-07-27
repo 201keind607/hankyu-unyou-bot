@@ -9,14 +9,13 @@ import os
 
 WEBHOOK_URL = os.environ["DISCORD_WEBHOOK"]
 
-# 監視する管理番号
+
 TARGET_UNYOU = [
     6088,
     5113
 ]
 
 
-# 個別メモ
 MEMO = {
     6088: "特急A 桂-桂",
     5113: "特急B 桂-正雀③"
@@ -111,15 +110,12 @@ def search_unyou(data):
 
 def send_discord(groups):
 
-
     now = datetime.now()
-
 
     embeds = []
 
 
     for group in groups:
-
 
         unyou_id = group["unyou_id"]
 
@@ -185,30 +181,24 @@ def send_discord(groups):
         })
 
 
-
     payload = {
 
-
         "content":
-
             f"🚃 {ROUTE_NAME} 運用情報\n"
             f"{now.year}年{now.month}月{now.day}日 "
             f"{now.hour}時{now.minute}分取得",
-
 
         "embeds": embeds
 
     }
 
 
-
-    requests.post(
-
+    r = requests.post(
         WEBHOOK_URL,
-
         json=payload
-
     )
+
+    r.raise_for_status()
 
 
 
@@ -217,7 +207,6 @@ def send_discord(groups):
 # ==========================
 
 if __name__ == "__main__":
-
 
     print("運用取得開始")
 
