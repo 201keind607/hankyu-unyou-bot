@@ -9,11 +9,14 @@ import os
 
 WEBHOOK_URL = os.environ["DISCORD_WEBHOOK"]
 
+# 監視する管理番号
 TARGET_UNYOU = [
     6088,
     5113
 ]
 
+
+# 個別メモ
 MEMO = {
     6088: "特急A 桂-桂",
     5113: "特急B 桂-正雀③"
@@ -22,7 +25,9 @@ MEMO = {
 
 API_URL = "https://www.elesite-next.com/fastapi/get_unyoutable"
 
+
 ROUTE_NAME = "阪急京都線"
+
 
 
 # ==========================
@@ -32,13 +37,20 @@ ROUTE_NAME = "阪急京都線"
 def get_unyou():
 
     params = {
+
         "rosen_code": "hankyu_kt",
+
         "day_id": 17,
+
         "select_date": str(date.today()),
+
         "edit_mode": "false",
+
         "selected_shotei_index": -1,
+
         "route_id": 517
     }
+
 
     r = requests.get(
         API_URL,
@@ -59,12 +71,35 @@ def search_unyou(data):
 
     result = []
 
+    all_ids = []
+
+
     for table in data["unyou_table"]:
 
         for group in table["unyou_group"]:
 
-            if group.get("unyou_id") in TARGET_UNYOU:
+            unyou_id = group.get("unyou_id")
+
+            all_ids.append(unyou_id)
+
+
+            if unyou_id in TARGET_UNYOU:
+
                 result.append(group)
+
+
+    print("取得管理番号:")
+    print(all_ids[:100])
+
+
+    print("対象番号確認:")
+    print(
+        [
+            x for x in all_ids
+            if x in TARGET_UNYOU
+        ]
+    )
+
 
     return result
 
@@ -76,66 +111,103 @@ def search_unyou(data):
 
 def send_discord(groups):
 
+
     now = datetime.now()
+
 
     embeds = []
 
+
     for group in groups:
+
 
         unyou_id = group["unyou_id"]
 
+
         sharyo = group.get("sharyo")
 
-        if not sharyo:
-            sharyo = "登録なし"
+
+        if sharyo:
+
+            sharyo_text = sharyo
+
+        else:
+
+            sharyo_text = "登録なし"
+
 
 
         bikou = group.get("sharyo_bikou")
 
+
         if bikou:
+
             bikou_text = "\n".join(bikou)
+
         else:
+
             bikou_text = "なし"
 
 
-        memo = MEMO.get(
-            unyou_id,
-            ""
+
+        text = (
+
+            f"**車両**\n"
+            f"{sharyo_text}\n\n"
+
+            f"**備考**\n"
+            f"{bikou_text}"
+
         )
 
 
-        text = (
-            f"**車両**\n{sharyo}\n\n"
-            f"**備考**\n{bikou_text}"
+        memo = MEMO.get(
+            unyou_id
         )
 
 
         if memo:
+
             text += (
-                f"\n\n**メモ**\n{memo}"
+
+                "\n\n**メモ**\n"
+                f"{memo}"
+
             )
 
 
         embeds.append({
+
             "title": f"管理番号 {unyou_id}",
+
             "description": text
+
         })
+
 
 
     payload = {
 
-        "content": f"🚃 {ROUTE_NAME} 運用情報\n"
-                   f"{now.year}年{now.month}月{now.day}日 "
-                   f"{now.hour}時{now.minute}分取得",
+
+        "content":
+
+            f"🚃 {ROUTE_NAME} 運用情報\n"
+            f"{now.year}年{now.month}月{now.day}日 "
+            f"{now.hour}時{now.minute}分取得",
+
 
         "embeds": embeds
 
     }
 
 
+
     requests.post(
+
         WEBHOOK_URL,
+
         json=payload
+
     )
 
 
@@ -146,12 +218,27 @@ def send_discord(groups):
 
 if __name__ == "__main__":
 
+
+    print("運用取得開始")
+
+
     data = get_unyou()
 
-    groups = search_unyou(data)
+
+    groups = search_unyou(
+        data
+    )
+
 
     if groups:
+
+        print("対象発見")
+
         send_discord(groups)
 
+        print("送信完了")
+
+
     else:
+
         print("対象なし")
