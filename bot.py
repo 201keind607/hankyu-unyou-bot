@@ -464,10 +464,9 @@ def main():
 
         else:
 
-
-            target_categories = list(
-                OPERATIONS.keys()
-            )
+　
+　　　　　　　print("対象時間外")
+　　　　　　　return
 
 
 
