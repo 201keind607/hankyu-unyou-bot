@@ -195,15 +195,15 @@ def send_category(category_name, operation_list, unyou_dict):
 
         "embeds": [
 
-            {
+    {
 
-                "title": category_name,
+        "title": f"🚃 {ROUTE_NAME}",
 
-                "description":
-                    f"{now.year}年{now.month}月{now.day}日 "
+        "description":
+            f"{now.year}年{now.month}月{now.day}日 "
+            f"{now.hour}時{now.minute}分取得",
 
-                "fields": [
-
+        "fields": [
                     {
 
                         "name": category_name,
