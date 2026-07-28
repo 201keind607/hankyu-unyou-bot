@@ -139,7 +139,7 @@ def get_unyou():
 
     response.raise_for_status()
 
-        return response.json()
+    return response.json()
 # ==========================================
 # unyou_id検索用辞書作成
 # ==========================================
