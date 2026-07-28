@@ -122,8 +122,7 @@ def send_error(message):
     payload = {
         "content":
             f"🚨 {ROUTE_NAME} 運用情報\n\n"
-            f"{now.year}年{now.month}月{now.day}日 "
-            f"{now.hour}時{now.minute}分取得\n\n"
+            f"{now.year}年{now.month}月{now.day}日 
             f"{message}"
     }
 
