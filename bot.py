@@ -465,8 +465,8 @@ def main():
         else:
 
 
-　　　　　　　print("対象時間外")
-　　　　　　　return
+            print("対象時間外")
+            return
 
 
 
