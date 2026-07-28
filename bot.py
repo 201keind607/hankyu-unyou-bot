@@ -260,19 +260,8 @@ def send_category(category_name, operation_list, unyou_dict):
 
                 "description":
                     f"{now.year}年{now.month}月{now.day}日 "
-                    f"{now.hour:02d}時{now.minute:02d}分取得",
-
-                "fields": [
-
-                    {
-
-                        "name": category_name,
-
-                        "value": description
-
-                    }
-
-                ]
+                    f"{now.hour:02d}時{now.minute:02d}分取得\n\n"
+                    f"{description}"
 
             }
 
