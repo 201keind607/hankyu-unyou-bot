@@ -138,6 +138,8 @@ def get_unyou():
 
 
     response.raise_for_status()
+
+        return response.json()
 # ==========================================
 # unyou_id検索用辞書作成
 # ==========================================
@@ -539,5 +541,3 @@ def main():
 if __name__ == "__main__":
 
     main()
-
-    return response.json()
