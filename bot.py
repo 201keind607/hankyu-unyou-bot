@@ -434,8 +434,6 @@ def main():
 
             target_categories = [
 
-                "平日特急",
-
                 "平日準特急",
 
                 "平日急行"
@@ -443,14 +441,12 @@ def main():
             ]
 
 
-        elif now.hour == 12:
+        elif now.hour == 8:
 
 
             target_categories = [
 
                 "平日特急",
-
-                "平日急行"
 
             ]
 
@@ -458,9 +454,12 @@ def main():
         elif now.hour == 17:
 
 
-            target_categories = list(
-                OPERATIONS.keys()
-            )
+            target_categories = [
+
+                "平日淡路行き",
+
+            ]
+
 
 
         else:
