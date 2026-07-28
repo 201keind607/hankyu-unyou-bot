@@ -197,11 +197,10 @@ def send_category(category_name, operation_list, unyou_dict):
 
             {
 
-                "title": f"🚃 {ROUTE_NAME}",
+                "title": category_name,
 
                 "description":
                     f"{now.year}年{now.month}月{now.day}日 "
-                    f"{now.hour}時{now.minute}分取得",
 
                 "fields": [
 
