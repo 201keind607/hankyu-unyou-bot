@@ -4,12 +4,10 @@ from datetime import datetime, timedelta, timezone
 
 
 # ==========================================
-# Discord
+# Discord Webhook
 # ==========================================
 
-WEBHOOK_URL = os.environ.get(
-    "DISCORD_WEBHOOK"
-)
+WEBHOOK_URL = os.environ["DISCORD_WEBHOOK"]
 
 
 # ==========================================
@@ -22,7 +20,7 @@ JST = timezone(
 
 
 # ==========================================
-# API
+# API設定
 # ==========================================
 
 API_URL = (
@@ -49,6 +47,7 @@ PARAMS = {
 }
 
 
+
 # ==========================================
 # 運用設定
 # ==========================================
@@ -71,7 +70,13 @@ OPERATIONS = {
         "準特急1 河原町6:00→梅田6:44",
 
         245:
-        "準特急2 河原町7:04→梅田7:55"
+        "準特急2 河原町7:04→梅田7:55・梅田8:02→河原町8:55",
+
+        735:
+        "準特急3 梅田6:14→河原町7:00",
+
+        246:
+        "準特急4 梅田6:48→河原町7:33"
 
     },
 
@@ -82,7 +87,10 @@ OPERATIONS = {
         "朝急行1 天神5:36→梅田6:10",
 
         810:
-        "朝急行2 天神5:52→梅田6:24"
+        "朝急行2 天神5:52→梅田6:24→特急運用",
+
+        737:
+        "朝急行3 河原町5:46→梅田6:36"
 
     },
 
@@ -93,15 +101,25 @@ OPERATIONS = {
         "8R 北千里22:07→淡路22:25",
 
         230:
-        "7R 北千里20:49→淡路21:08"
+        "7R 北千里20:49→淡路21:08",
 
-    }# ==========================================
+        232:
+        "7R 北千里21:52→淡路22:11"
+
+    }
+
+}
+
+
+
+# ==========================================
 # API取得
 # ==========================================
 
 def get_unyou():
 
     params = PARAMS.copy()
+
 
     params["select_date"] = str(
         datetime.now(JST).date()
@@ -120,14 +138,8 @@ def get_unyou():
 
 
     response.raise_for_status()
-
-
-    return response.json()
-
-
-
 # ==========================================
-# 運用辞書作成
+# unyou_id検索用辞書作成
 # ==========================================
 
 def create_unyou_dict(data):
@@ -170,22 +182,17 @@ def get_operation(
 
     return unyou_dict.get(
         unyou_id
-    )# ==========================================
+    )
+
+
+
+# ==========================================
 # Discord送信
 # ==========================================
 
 def send_webhook(payload):
 
-    if not WEBHOOK_URL:
-
-        print(
-            "Webhook未設定"
-        )
-
-        return
-
-
-    requests.post(
+    response = requests.post(
 
         WEBHOOK_URL,
 
@@ -193,92 +200,50 @@ def send_webhook(payload):
 
         timeout=20
 
-    ).raise_for_status()
+    )
+
+
+    response.raise_for_status()
 
 
 
 # ==========================================
-# カテゴリ送信
+# エラー通知
 # ==========================================
 
-def send_category(
-    name,
-    operations,
-    unyou_dict
-):
+def send_error(message):
 
     now = datetime.now(JST)
 
 
-    lines = []
-
-
-    for unyou_id, memo in operations.items():
-
-        group = get_operation(
-            unyou_dict,
-            unyou_id
-        )
-
-
-        if group:
-
-            sharyo = (
-                group.get(
-                    "display_sharyo"
-                )
-                or "登録なし"
-            )
-
-
-            bikou = group.get(
-                "sharyo_bikou"
-            )
-
-
-            if bikou:
-
-                bikou = " / ".join(
-                    bikou
-                )
-
-            else:
-
-                bikou = "なし"
-
-
-        else:
-
-            sharyo = "登録なし"
-
-            bikou = "なし"
-
-
-
-        lines.append(
-
-            f"■ {unyou_id}\n"
-            f"車両：{sharyo}\n"
-            f"備考：{bikou}\n"
-            f"メモ：{memo}"
-
-        )
-
-
-
     payload = {
 
-        "embeds":[
+        "embeds": [
 
             {
 
-                "title":name,
+                "title":
+                    f"🚨 {ROUTE_NAME}",
+
 
                 "description":
+                    f"{now:%Y年%m月%d日 %H時%M分}取得",
 
-                f"{now:%Y年%m月%d日 %H:%M}取得\n\n"
-                +
-                "\n\n".join(lines)
+
+                "fields": [
+
+                    {
+
+                        "name":
+                            "エラー",
+
+
+                        "value":
+                            str(message)
+
+                    }
+
+                ]
 
             }
 
@@ -291,4 +256,288 @@ def send_category(
         payload
     )
 
-}
+
+
+# ==========================================
+# カテゴリ送信
+# ==========================================
+
+def send_category(
+    category_name,
+    operation_list,
+    unyou_dict
+):
+
+    now = datetime.now(JST)
+
+
+    messages = []
+
+
+
+    for unyou_id, memo in operation_list.items():
+
+
+        group = get_operation(
+
+            unyou_dict,
+
+            unyou_id
+
+        )
+
+
+
+        if group is None:
+
+
+            messages.append(
+
+                f"■ 運用 {unyou_id}\n"
+                f"車両：登録なし\n"
+                f"備考：なし\n"
+                f"メモ：{memo}"
+
+            )
+
+
+            continue
+
+
+
+        sharyo = (
+
+            group.get(
+                "display_sharyo"
+            )
+
+            or group.get(
+                "sharyo"
+            )
+
+            or "登録なし"
+
+        )
+
+
+
+        bikou = group.get(
+            "sharyo_bikou"
+        )
+
+
+
+        if bikou:
+
+            bikou_text = " / ".join(
+                bikou
+            )
+
+        else:
+
+            bikou_text = "なし"
+
+
+
+        messages.append(
+
+            f"■ 運用 {unyou_id}\n"
+            f"車両：{sharyo}\n"
+            f"備考：{bikou_text}\n"
+            f"メモ：{memo}"
+
+        )
+
+
+
+    description = (
+
+        f"{now:%Y年%m月%d日 %H時%M分}取得\n\n"
+
+        +
+
+        "\n\n".join(messages)
+
+    )
+
+
+
+    payload = {
+
+        "embeds": [
+
+            {
+
+                "title":
+                    category_name,
+
+
+                "description":
+                    description
+
+            }
+
+        ]
+
+    }
+
+
+    send_webhook(
+        payload
+    )# ==========================================
+# 実行
+# ==========================================
+
+def main():
+
+    print("==============================")
+    print(f"{ROUTE_NAME} 運用情報取得開始")
+    print("==============================")
+
+
+    try:
+
+        now = datetime.now(JST)
+
+
+
+        # --------------------------
+        # 時間帯別送信設定
+        # --------------------------
+
+        if now.hour == 7:
+
+
+            target_categories = [
+
+                "平日特急",
+
+                "平日準特急",
+
+                "平日急行"
+
+            ]
+
+
+        elif now.hour == 12:
+
+
+            target_categories = [
+
+                "平日特急",
+
+                "平日急行"
+
+            ]
+
+
+        elif now.hour == 17:
+
+
+            target_categories = list(
+                OPERATIONS.keys()
+            )
+
+
+        else:
+
+
+            target_categories = list(
+                OPERATIONS.keys()
+            )
+
+
+
+        # --------------------------
+        # API取得
+        # --------------------------
+
+        data = get_unyou()
+
+
+
+        # --------------------------
+        # 辞書化
+        # --------------------------
+
+        unyou_dict = create_unyou_dict(
+            data
+        )
+
+
+        print(
+            f"取得件数：{len(unyou_dict)}件"
+        )
+
+
+
+        # --------------------------
+        # Discord送信
+        # --------------------------
+
+        for category_name in target_categories:
+
+
+            print(
+                f"{category_name}送信中..."
+            )
+
+
+
+            send_category(
+
+                category_name,
+
+                OPERATIONS[category_name],
+
+                unyou_dict
+
+            )
+
+
+
+            print(
+                f"{category_name}送信完了"
+            )
+
+
+
+        print("==============================")
+        print("全カテゴリ送信完了")
+        print("==============================")
+
+
+
+    except Exception as e:
+
+
+        print("==============================")
+        print("取得失敗")
+        print(e)
+        print("==============================")
+
+
+        try:
+
+            send_error(e)
+
+
+        except Exception as err:
+
+            print(
+                "エラー通知失敗"
+            )
+
+            print(err)
+
+
+
+# ==========================================
+# 起動
+# ==========================================
+
+if __name__ == "__main__":
+
+    main()
+
+    return response.json()
