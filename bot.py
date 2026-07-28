@@ -260,98 +260,6 @@ def send_error(message):
 
 
 
-# ==========================================
-# カテゴリ送信
-# ==========================================
-
-def send_category(
-    category_name,
-    operation_list,
-    unyou_dict
-):
-
-    now = datetime.now(JST)
-
-
-    messages = []
-
-
-
-    for unyou_id, memo in operation_list.items():
-
-
-        group = get_operation(
-
-            unyou_dict,
-
-            unyou_id
-
-        )
-
-
-
-        if group is None:
-
-
-            messages.append(
-
-                f"■ 運用 {unyou_id}\n"
-                f"車両：登録なし\n"
-                f"備考：なし\n"
-                f"メモ：{memo}"
-
-            )
-
-
-            continue
-
-
-
-        sharyo = (
-
-            group.get(
-                "display_sharyo"
-            )
-
-            or group.get(
-                "sharyo"
-            )
-
-            or "登録なし"
-
-        )
-
-
-
-        bikou = group.get(
-            "sharyo_bikou"
-        )
-
-
-
-        if bikou:
-
-            bikou_text = " / ".join(
-                bikou
-            )
-
-        else:
-
-            bikou_text = "なし"
-
-
-
-        messages.append(
-
-            f"■ 運用 {unyou_id}\n"
-            f"車両：{sharyo}\n"
-            f"備考：{bikou_text}\n"
-            f"メモ：{memo}"
-
-        )
-
-
-
     description = (
 
         f"{now:%Y年%m月%d日 %H時%M分}取得\n\n"
@@ -363,10 +271,25 @@ def send_category(
     )
 
 
+    if category_name in ["平日特急", "平日準特急"]:
+
+        color = 16711680
+
+
+    elif category_name == "平日急行":
+
+        color = 16776960
+
+
+    else:
+
+        color = 3447003
+
+
 
     payload = {
 
-        "embeds": [
+         "embeds": [
 
             {
 
@@ -375,18 +298,15 @@ def send_category(
 
 
                 "description":
-                    description
+                    description,
+
+
+                "color":
+                    color
 
             }
 
-        ]
-
-    }
-
-
-    send_webhook(
-        payload
-    )# ==========================================
+        ]# ==========================================
 # 実行
 # ==========================================
 
