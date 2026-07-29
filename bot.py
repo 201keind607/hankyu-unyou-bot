@@ -441,7 +441,7 @@ def main():
             ]
 
 
-        elif now.hour == 8:
+        elif now.hour == 9:
 
 
             target_categories = [
