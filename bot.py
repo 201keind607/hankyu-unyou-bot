@@ -432,47 +432,14 @@ def main():
 
 
         # --------------------------
-        # 時間帯別送信設定
+        # 時間帯別送信設定（テスト）
         # --------------------------
 
-        if now.hour == 7:
+        target_categories = [
 
+            "平日特急",
 
-            target_categories = [
-
-                "平日準特急",
-
-                "平日急行"
-
-            ]
-
-
-        elif now.hour == 10:
-
-
-            target_categories = [
-
-                "平日特急",
-
-            ]
-
-
-        elif now.hour == 17:
-
-
-            target_categories = [
-
-                "平日淡路行き",
-
-            ]
-
-
-
-        else:
-
-
-            print("対象時間外")
-            return
+        ]
 
 
 
