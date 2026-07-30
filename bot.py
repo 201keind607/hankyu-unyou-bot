@@ -216,6 +216,9 @@ def send_webhook(payload):
 def send_error(message):
 
     now = datetime.now(JST)
+    
+    print(now)
+    print(now.hour)
 
 
     payload = {
@@ -422,6 +425,9 @@ def main():
     try:
 
         now = datetime.now(JST)
+    
+        print(now)
+        print(now.hour)
 
 
 
