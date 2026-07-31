@@ -2,9 +2,7 @@ name: Hankyu Unyou Bot v2
 
 on:
   schedule:
-    - cron: "0 22 * * 1-5"   # 7:00 JST
-    - cron: "0 1 * * 1-5"    # 10:00 JST
-    - cron: "0 8 * * 1-5"    # 17:00 JST
+    - cron: "*/5 * * * *"
 
   workflow_dispatch:
 
