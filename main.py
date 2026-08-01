@@ -5,157 +5,68 @@
 import config
 import common
 
-
-# ==========================================
-# 運用番号設定
-# ==========================================
-
-OPERATIONS = {
-
-    "平日特急": {
-        802: "特急A 桂-桂",
-        810: "特急B 桂-正雀③",
-    },
-
-    "平日準特急": {
-        242: "準特急1 河原町6:00→梅田6:44",
-        245: "準特急2 河原町7:04→梅田7:55・梅田8:02→河原町8:55",
-        735: "準特急3 梅田6:14→河原町7:00",
-        246: "準特急4 梅田6:48→河原町7:33",
-    },
-
-    "平日急行": {
-        682: "朝急行1 天神5:36→梅田6:10",
-        810: "朝急行2 天神5:52→梅田6:24→特急運用",
-        737: "朝急行3 河原町5:46→梅田6:36",
-    },
-
-    "平日淡路行き": {
-
-    },
-
-    # 土休日追加予定
-}
+from routes import hankyu_kyoto
 
 
 # ==========================================
-# 運用番号辞書作成
+# 路線取得
 # ==========================================
 
-def create_unyou_dict(data):
+def get_route_data(route):
 
-    unyou_dict = {}
+    if route == "hankyu_kyoto":
 
-    for item in data:
+        return hankyu_kyoto.get_operations()
 
-        if "unyou_id" in item:
-
-            unyou_dict[item["unyou_id"]] = item
-
-    return unyou_dict
+    return []
 
 
 # ==========================================
-# 車両番号取得
+# 実行
 # ==========================================
 
-def get_vehicle_number(data):
+def main():
 
-    if not data:
-
-        return "取得失敗"
-
-
-    for key in [
-        "vehicle",
-        "vehicle_no",
-        "car_no",
-        "car_number",
-        "sharyo"
-    ]:
-
-        if key in data:
-
-            return str(data[key])
+    print("===================================")
+    print("運用情報取得開始")
+    print("===================================")
 
 
-    return "車両情報なし"
+    for route in config.ROUTES:
+
+        print(f"{route} 取得開始")
 
 
-# ==========================================
-# Discord Embed作成
-# ==========================================
-
-def create_embeds(category, unyou_dict):
-
-    embeds = []
-
-    for unyou_id, memo in OPERATIONS.get(category, {}).items():
-
-        data = unyou_dict.get(unyou_id)
-
-        vehicle = get_vehicle_number(data)
-
-        embeds.append(
-            {
-                "title": category,
-
-                "description": (
-                    f"運用番号：{unyou_id}\n"
-                    f"車両：{vehicle}\n"
-                    f"備考：{memo}"
-                )
-            }
-        )
-
-    return embeds
+        embeds = get_route_data(route)
 
 
-# ==========================================
-# 阪急京都線 運用取得
-# ==========================================
+        if not embeds:
 
-def get_operations():
-
-    api_params = config.API_PARAMS["hankyu_kyoto"]
+            print(f"{route} 対象データなし")
+            continue
 
 
-    params = {
-
-        "rosen_code": api_params["rosen_code"],
-
-        "day_id": config.DAY_ID[
-            api_params["day_type"]
-        ],
-
-        "edit_mode": "false",
-
-        "selected_shotei_index": -1,
-
-        "route_id": api_params["route_id"],
-    }
+        webhook = config.WEBHOOKS.get(route)
 
 
-    data = common.get_unyou(
-        config.API_URL,
-        params
-    )
-
-
-    unyou_dict = create_unyou_dict(data)
-
-
-    embeds = []
-
-
-    for category in OPERATIONS:
-
-        embeds.extend(
-            create_embeds(
-                category,
-                unyou_dict
-            )
+        common.send_discord(
+            webhook,
+            embeds
         )
 
 
-    return embeds
+        print(f"{route} Discord送信完了")
+
+
+    print("===================================")
+    print("運用情報取得終了")
+    print("===================================")
+
+
+# ==========================================
+# 起動
+# ==========================================
+
+if __name__ == "__main__":
+
+    main()
