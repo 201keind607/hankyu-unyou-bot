@@ -36,7 +36,22 @@ OPERATIONS = {
 
     },
 
-    # 土休日追加予定
+}
+
+
+# ==========================================
+# 色設定
+# ==========================================
+
+COLORS = {
+
+    "平日特急": 16711680,
+
+    "平日準特急": 16711680,
+
+    "平日急行": 16776960,
+
+    "平日淡路行き": 3447003,
 
 }
 
@@ -56,6 +71,7 @@ def create_unyou_dict(data):
             unyou_dict[item["unyou_id"]] = item
 
     return unyou_dict
+
 
 
 # ==========================================
@@ -85,13 +101,14 @@ def get_vehicle_number(data):
     return "車両情報なし"
 
 
+
 # ==========================================
 # Embed作成
 # ==========================================
 
-def create_embeds(category, unyou_dict):
+def create_embed(category, unyou_dict):
 
-    embeds = []
+    fields = []
 
 
     for unyou_id, memo in OPERATIONS.get(category, {}).items():
@@ -101,20 +118,41 @@ def create_embeds(category, unyou_dict):
         vehicle = get_vehicle_number(data)
 
 
-        embeds.append(
+        fields.append(
             {
-                "title": category,
-
-                "description": (
-                    f"運用番号：{unyou_id}\n"
+                "name": f"運用番号 {unyou_id}",
+                "value": (
                     f"車両：{vehicle}\n"
                     f"備考：{memo}"
-                )
+                ),
+                "inline": False
             }
         )
 
 
-    return embeds
+    if not fields:
+
+        return None
+
+
+    return {
+
+        "title": category,
+
+        "description": (
+            f"{datetime.now().strftime('%Y年%m月%d日 %H:%M')}"
+            "取得"
+        ),
+
+        "color": COLORS.get(
+            category,
+            3447003
+        ),
+
+        "fields": fields
+
+    }
+
 
 
 # ==========================================
@@ -161,12 +199,15 @@ def get_operations():
 
     for category in OPERATIONS:
 
-        embeds.extend(
-            create_embeds(
-                category,
-                unyou_dict
-            )
+        embed = create_embed(
+            category,
+            unyou_dict
         )
+
+
+        if embed:
+
+            embeds.append(embed)
 
 
     return embeds
