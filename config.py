@@ -1,42 +1,76 @@
 # ==========================================
+# import
+# ==========================================
+
+import os
+
+
+# ==========================================
 # 共通設定
 # ==========================================
 
 # API
-API_URL = "https://www.elesite-next.com/fastapi/get_unyoutable"
+
+API_URL = (
+    "https://www.elesite-next.com/"
+    "fastapi/get_unyoutable"
+)
+
 
 # Discord Webhook
+
 WEBHOOKS = {
-    "hankyu_kyoto": "ここに阪急京都線のWebhook",
+
+    "hankyu_kyoto": os.environ.get(
+        "DISCORD_WEBHOOK",
+        ""
+    ),
+
 }
+
 
 # ==========================================
 # 実行する路線
 # ==========================================
 
 ROUTES = [
+
     "hankyu_kyoto",
+
 ]
+
 
 # ==========================================
 # ダイヤ設定
 # ==========================================
 
 DAY_ID = {
+
     "weekday": 17,
-    # "holiday": xx  ← 後で追加
+
+    # "holiday": xx
+    # 後で追加
+
 }
+
 
 # ==========================================
 # API設定
 # ==========================================
 
 API_PARAMS = {
+
     "hankyu_kyoto": {
+
         "rosen_code": "hankyu_kt",
+
         "route_id": 517,
+
         "day_type": "weekday",
+
     },
 
+
     # ↓ここへ他路線を追加
+
 }
