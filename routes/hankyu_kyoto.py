@@ -2,6 +2,8 @@
 # import
 # ==========================================
 
+from datetime import datetime
+
 import config
 import common
 
@@ -35,6 +37,7 @@ OPERATIONS = {
     },
 
     # 土休日追加予定
+
 }
 
 
@@ -83,18 +86,20 @@ def get_vehicle_number(data):
 
 
 # ==========================================
-# Discord Embed作成
+# Embed作成
 # ==========================================
 
 def create_embeds(category, unyou_dict):
 
     embeds = []
 
+
     for unyou_id, memo in OPERATIONS.get(category, {}).items():
 
         data = unyou_dict.get(unyou_id)
 
         vehicle = get_vehicle_number(data)
+
 
         embeds.append(
             {
@@ -107,6 +112,7 @@ def create_embeds(category, unyou_dict):
                 )
             }
         )
+
 
     return embeds
 
@@ -128,11 +134,16 @@ def get_operations():
             api_params["day_type"]
         ],
 
+        "select_date": datetime.now().strftime(
+            "%Y-%m-%d"
+        ),
+
         "edit_mode": "false",
 
         "selected_shotei_index": -1,
 
         "route_id": api_params["route_id"],
+
     }
 
 
