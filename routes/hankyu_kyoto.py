@@ -31,7 +31,7 @@ OPERATIONS = {
     },
 
     "平日淡路行き": {
-        # 後で追加
+
     },
 
     # 土休日追加予定
@@ -39,20 +39,20 @@ OPERATIONS = {
 
 
 # ==========================================
-# 運用番号検索用辞書作成
+# 運用番号辞書作成
 # ==========================================
 
 def create_unyou_dict(data):
 
-    result = {}
+    unyou_dict = {}
 
     for item in data:
 
         if "unyou_id" in item:
 
-            result[item["unyou_id"]] = item
+            unyou_dict[item["unyou_id"]] = item
 
-    return result
+    return unyou_dict
 
 
 # ==========================================
@@ -62,14 +62,21 @@ def create_unyou_dict(data):
 def get_vehicle_number(data):
 
     if not data:
+
         return "取得失敗"
 
 
-    vehicle = data.get("vehicle")
+    for key in [
+        "vehicle",
+        "vehicle_no",
+        "car_no",
+        "car_number",
+        "sharyo"
+    ]:
 
+        if key in data:
 
-    if vehicle:
-        return vehicle
+            return str(data[key])
 
 
     return "車両情報なし"
@@ -83,18 +90,16 @@ def create_embeds(category, unyou_dict):
 
     embeds = []
 
-
     for unyou_id, memo in OPERATIONS.get(category, {}).items():
 
         data = unyou_dict.get(unyou_id)
 
-
         vehicle = get_vehicle_number(data)
-
 
         embeds.append(
             {
                 "title": category,
+
                 "description": (
                     f"運用番号：{unyou_id}\n"
                     f"車両：{vehicle}\n"
@@ -103,28 +108,37 @@ def create_embeds(category, unyou_dict):
             }
         )
 
-
     return embeds
 
 
 # ==========================================
-# 阪急京都線取得
+# 阪急京都線 運用取得
 # ==========================================
 
 def get_operations():
 
-    params = config.API_PARAMS["hankyu_kyoto"]
+    api_params = config.API_PARAMS["hankyu_kyoto"]
+
+
+    params = {
+
+        "rosen_code": api_params["rosen_code"],
+
+        "day_id": config.DAY_ID[
+            api_params["day_type"]
+        ],
+
+        "edit_mode": "false",
+
+        "selected_shotei_index": -1,
+
+        "route_id": api_params["route_id"],
+    }
 
 
     data = common.get_unyou(
         config.API_URL,
-        {
-            "rosen_code": params["rosen_code"],
-            "day_id": config.DAY_ID[params["day_type"]],
-            "edit_mode": "false",
-            "selected_shotei_index": -1,
-            "route_id": params["route_id"],
-        }
+        params
     )
 
 
