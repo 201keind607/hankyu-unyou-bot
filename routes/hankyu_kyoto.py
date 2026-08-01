@@ -2,10 +2,19 @@
 # import
 # ==========================================
 
-from datetime import datetime
+from datetime import datetime, timezone, timedelta
 
 import config
 import common
+
+
+# ==========================================
+# JST
+# ==========================================
+
+JST = timezone(
+    timedelta(hours=9)
+)
 
 
 # ==========================================
@@ -121,10 +130,12 @@ def create_embed(category, unyou_dict):
         fields.append(
             {
                 "name": f"運用番号 {unyou_id}",
+
                 "value": (
                     f"車両：{vehicle}\n"
                     f"備考：{memo}"
                 ),
+
                 "inline": False
             }
         )
@@ -135,13 +146,15 @@ def create_embed(category, unyou_dict):
         return None
 
 
+    now = datetime.now(JST)
+
+
     return {
 
         "title": category,
 
         "description": (
-            f"{datetime.now().strftime('%Y年%m月%d日 %H:%M')}"
-            "取得"
+            f"{now.strftime('%Y年%m月%d日 %H時%M分')}取得"
         ),
 
         "color": COLORS.get(
@@ -164,6 +177,9 @@ def get_operations():
     api_params = config.API_PARAMS["hankyu_kyoto"]
 
 
+    now = datetime.now(JST)
+
+
     params = {
 
         "rosen_code": api_params["rosen_code"],
@@ -172,7 +188,7 @@ def get_operations():
             api_params["day_type"]
         ],
 
-        "select_date": datetime.now().strftime(
+        "select_date": now.strftime(
             "%Y-%m-%d"
         ),
 
