@@ -277,7 +277,7 @@ def create_embed(category, unyou_dict):
 # 阪急京都線 運用取得
 # ==========================================
 
-def get_operations():
+def get_operations(target_categories):
 
 
     api_params = config.API_PARAMS[
@@ -326,7 +326,7 @@ def get_operations():
     embeds = []
 
 
-    for category in OPERATIONS:
+    for category in target_categories:
 
         embed = create_embed(
 
