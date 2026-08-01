@@ -2,18 +2,24 @@
 # import
 # ==========================================
 
+import config
+import common
+
 from routes import hankyu_kyoto
 
 
 # ==========================================
-# 阪急京都線 運用取得
+# 路線処理
 # ==========================================
 
-def get_hankyu_data(category):
+def run_route(route_name):
 
-    return hankyu_kyoto.get_hankyu_operations(
-        category
-    )
+    if route_name == "hankyu_kyoto":
+
+        return hankyu_kyoto.get_operations()
+
+
+    return []
 
 
 # ==========================================
@@ -23,14 +29,31 @@ def get_hankyu_data(category):
 def main():
 
     print("===================================")
-    print("阪急京都線 運用情報取得開始")
+    print("運用情報取得開始")
     print("===================================")
 
-    category = "平日特急"
 
-    data = get_hankyu_data(category)
+    for route in config.ROUTES:
 
-    print(data)
+        print(f"{route} 取得開始")
+
+        embeds = run_route(route)
+
+
+        if embeds:
+
+            common.send_discord(
+                config.WEBHOOKS[route],
+                embeds
+            )
+
+
+        print(f"{route} 送信完了")
+
+
+    print("===================================")
+    print("運用情報取得終了")
+    print("===================================")
 
 
 # ==========================================
@@ -40,4 +63,3 @@ def main():
 if __name__ == "__main__":
 
     main()
-
