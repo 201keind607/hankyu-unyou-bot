@@ -4,8 +4,11 @@
 
 from datetime import datetime, timezone, timedelta
 
+import jpholiday
+
 import config
 import common
+
 
 
 # ==========================================
@@ -17,15 +20,12 @@ JST = timezone(
 )
 
 
+
 # ==========================================
-# 運用番号設定
+# 運用設定
 # ==========================================
 
 OPERATIONS = {
-
-    # ======================================
-    # 朝急行
-    # ======================================
 
     "平日朝急行": {
 
@@ -37,10 +37,6 @@ OPERATIONS = {
 
     },
 
-
-    # ======================================
-    # 朝準特急
-    # ======================================
 
     "平日朝準特急": {
 
@@ -55,11 +51,7 @@ OPERATIONS = {
     },
 
 
-    # ======================================
-    # 特急
-    # ======================================
-
-    "平日特急": {
+    "平日朝特急": {
 
         802: "特急A 桂-桂",
 
@@ -68,24 +60,16 @@ OPERATIONS = {
     },
 
 
-    # ======================================
-    # 淡路行き
-    # ======================================
-
     "平日淡路行き": {
 
-    815: "8R 北千里22:07→淡路22:25",
+        815: "8R 北千里22:07→淡路22:25",
 
-    230: "7R 北千里20:49→淡路21:08",
+        230: "7R 北千里20:49→淡路21:08",
 
-    232: "7R 北千里21:52→淡路22:11",
+        232: "7R 北千里21:52→淡路22:11",
 
-},
+    },
 
-
-    # ======================================
-    # 長岡天神行き
-    # ======================================
 
     "平日長岡天神行き": {
 
@@ -93,10 +77,6 @@ OPERATIONS = {
 
     },
 
-
-    # ======================================
-    # 夜準特急
-    # ======================================
 
     "平日夜準特急": {
 
@@ -117,10 +97,6 @@ OPERATIONS = {
     },
 
 
-    # ======================================
-    # 夜急行
-    # ======================================
-
     "平日夜急行": {
 
         253: "夜急行1 梅田23:15→河原24:04",
@@ -132,6 +108,9 @@ OPERATIONS = {
     },
 
 }
+
+
+
 # ==========================================
 # 色設定
 # ==========================================
@@ -142,7 +121,7 @@ COLORS = {
 
     "平日朝準特急": 16711680,
 
-    "平日特急": 16711680,
+    "平日朝特急": 16711680,
 
     "平日淡路行き": 3447003,
 
@@ -153,6 +132,30 @@ COLORS = {
     "平日夜急行": 16776960,
 
 }
+# ==========================================
+# ダイヤ判定
+# ==========================================
+
+def get_day_id(now):
+
+    if (
+        now.weekday() >= 5
+        or jpholiday.is_holiday(
+            now.date()
+        )
+    ):
+
+        print("土休日ダイヤ")
+
+        return config.DAY_ID["holiday"]
+
+
+    else:
+
+        print("平日ダイヤ")
+
+        return config.DAY_ID["weekday"]
+
 
 
 # ==========================================
@@ -167,7 +170,9 @@ def create_unyou_dict(data):
 
         if "unyou_id" in item:
 
-            unyou_dict[item["unyou_id"]] = item
+            unyou_dict[
+                item["unyou_id"]
+            ] = item
 
 
     return unyou_dict
@@ -182,7 +187,7 @@ def get_vehicle_number(data):
 
     if not data:
 
-        return "取得失敗"
+        return "登録なし"
 
 
     for key in [
@@ -201,10 +206,12 @@ def get_vehicle_number(data):
 
         if key in data:
 
-            return str(data[key])
+            return str(
+                data[key]
+            )
 
 
-    return "車両情報なし"
+    return "登録なし"
 
 
 
@@ -212,12 +219,19 @@ def get_vehicle_number(data):
 # Embed作成
 # ==========================================
 
-def create_embed(category, unyou_dict):
+def create_embed(
+    category,
+    unyou_dict
+):
 
     fields = []
 
 
-    for unyou_id, memo in OPERATIONS.get(category, {}).items():
+    for unyou_id, memo in OPERATIONS.get(
+        category,
+        {}
+    ).items():
+
 
         data = unyou_dict.get(
             unyou_id
@@ -230,18 +244,23 @@ def create_embed(category, unyou_dict):
 
 
         fields.append(
+
             {
 
-                "name": f"運用番号 {unyou_id}",
+                "name": f"運用 {unyou_id}",
 
                 "value": (
+
                     f"車両：{vehicle}\n"
+
                     f"備考：{memo}"
+
                 ),
 
                 "inline": False
 
             }
+
         )
 
 
@@ -259,12 +278,17 @@ def create_embed(category, unyou_dict):
         "title": category,
 
         "description": (
+
             f"{now.strftime('%Y年%m月%d日 %H時%M分')}取得"
+
         ),
 
         "color": COLORS.get(
+
             category,
+
             3447003
+
         ),
 
         "fields": fields
@@ -277,7 +301,9 @@ def create_embed(category, unyou_dict):
 # 阪急京都線 運用取得
 # ==========================================
 
-def get_operations(target_categories):
+def get_operations(
+    target_categories
+):
 
 
     api_params = config.API_PARAMS[
@@ -288,25 +314,46 @@ def get_operations(target_categories):
     now = datetime.now(JST)
 
 
+    day_id = get_day_id(
+        now
+    )
+
+
     params = {
 
-        "rosen_code": api_params["rosen_code"],
+        "rosen_code":
 
-        "day_id": config.DAY_ID[
-            api_params["day_type"]
-        ],
+            api_params["rosen_code"],
 
-        "select_date": now.strftime(
-            "%Y-%m-%d"
-        ),
 
-        "edit_mode": "false",
+        "day_id":
 
-        "selected_shotei_index": -1,
+            day_id,
 
-        "route_id": api_params["route_id"],
+
+        "select_date":
+
+            now.strftime(
+                "%Y-%m-%d"
+            ),
+
+
+        "edit_mode":
+
+            "false",
+
+
+        "selected_shotei_index":
+
+            -1,
+
+
+        "route_id":
+
+            api_params["route_id"],
 
     }
+
 
 
     data = common.get_unyou(
@@ -318,6 +365,7 @@ def get_operations(target_categories):
     )
 
 
+
     unyou_dict = create_unyou_dict(
         data
     )
@@ -326,7 +374,9 @@ def get_operations(target_categories):
     embeds = []
 
 
+
     for category in target_categories:
+
 
         embed = create_embed(
 
