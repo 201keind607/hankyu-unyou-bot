@@ -270,12 +270,73 @@ def create_embed(
             {
 
                 "name": f"運用 {unyou_id}",
+# ==========================================
+# Embed作成
+# ==========================================
+
+def create_embed(
+    category,
+    operations,
+    unyou_dict
+):
+
+    fields = []
+
+    for unyou_id, memo in operations.items():
+
+        group = unyou_dict.get(
+            unyou_id
+        )
+
+        if group is None:
+
+            vehicle = "登録なし"
+            bikou_text = "なし"
+
+        else:
+
+            vehicle = (
+
+                group.get(
+                    "display_sharyo"
+                )
+
+                or group.get(
+                    "sharyo"
+                )
+
+                or "登録なし"
+
+            )
+
+            bikou = group.get(
+                "sharyo_bikou"
+            )
+
+            if bikou:
+
+                bikou_text = " / ".join(
+                    bikou
+                )
+
+            else:
+
+                bikou_text = "なし"
+
+
+        fields.append(
+
+            {
+
+                "name": f"運用 {unyou_id}",
 
                 "value": (
 
                     f"車両：{vehicle}\n"
 
-                    f"備考：{memo}"
+                    f"備考：{bikou_text}\n"
+
+                    f"メモ：{memo}"
 
                 ),
 
@@ -286,15 +347,12 @@ def create_embed(
         )
 
 
-
     if not fields:
 
         return None
 
 
-
     now = datetime.now(JST)
-
 
 
     return {
@@ -317,8 +375,7 @@ def create_embed(
 
         "fields": fields
 
-    }
-
+                }
 
 
 # ==========================================
