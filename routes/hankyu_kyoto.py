@@ -239,37 +239,6 @@ def get_vehicle_number(data):
     return "登録なし"
 
 
-
-# ==========================================
-# Embed作成
-# ==========================================
-
-def create_embed(
-    category,
-    operations,
-    unyou_dict
-):
-
-    fields = []
-
-
-    for unyou_id, memo in operations.items():
-
-        data = unyou_dict.get(
-            unyou_id
-        )
-
-
-        vehicle = get_vehicle_number(
-            data
-        )
-
-
-        fields.append(
-
-            {
-
-                "name": f"運用 {unyou_id}",
 # ==========================================
 # Embed作成
 # ==========================================
