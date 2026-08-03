@@ -43,7 +43,7 @@ def get_target_categories():
         ]
 
 
-    elif now.hour == 15:
+    elif now.hour == 17:
 
         return [
             "平日淡路行き",
