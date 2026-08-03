@@ -191,18 +191,18 @@ def create_unyou_dict(data):
 
     unyou_dict = {}
 
-    for item in data:
+    for shotei in data:
 
-        if "unyou_id" in item:
+        for group in shotei.get(
+            "unyou_group",
+            []
+        ):
 
             unyou_dict[
-                item["unyou_id"]
-            ] = item
+                group["unyou_id"]
+            ] = group
 
-
-    print(unyou_dict.keys())
     return unyou_dict
-
 
 
 # ==========================================
