@@ -434,7 +434,7 @@ def get_operations(
 
 
     unyou_dict = create_unyou_dict(
-        data
+    data["unyou_table"]
     )
 
 
