@@ -426,6 +426,7 @@ def get_operations(
         params
 
     )
+    print(data["unyou_table"][0])
     print(len(data))
     print(type(data))
     print(data.keys())
