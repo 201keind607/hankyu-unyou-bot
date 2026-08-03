@@ -200,6 +200,7 @@ def create_unyou_dict(data):
             ] = item
 
 
+    print(unyou_dict.keys())
     return unyou_dict
 
 
@@ -291,6 +292,8 @@ def create_embed(
             else:
 
                 bikou_text = "なし"
+        print(group)
+        print(unyou_id, type(unyou_id))
 
 
         fields.append(
