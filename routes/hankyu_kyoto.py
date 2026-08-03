@@ -426,6 +426,8 @@ def get_operations(
         params
 
     )
+    print(len(data))
+    print(data[:3])
 
 
 
