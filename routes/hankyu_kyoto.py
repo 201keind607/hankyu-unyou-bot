@@ -426,12 +426,6 @@ def get_operations(
         params
 
     )
-    print(data["unyou_table"][0])
-    print(len(data))
-    print(type(data))
-    print(data.keys())
-    for key, value in data.items():
-        print(key, type(value))
 
 
     unyou_dict = create_unyou_dict(
