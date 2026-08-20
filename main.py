@@ -39,7 +39,7 @@ def get_target_categories():
     elif now.hour == 9:
 
         return [
-            "平日朝特急",
+            "平日特急",
         ]
 
 
